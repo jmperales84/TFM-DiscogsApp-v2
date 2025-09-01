@@ -75,12 +75,12 @@ services:
     volumes:
       - ./microservicios/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
     depends_on:
-      - jazz_queries
+      - jazz-queries
     networks:
       - mi_red_privada
       - mi_red_publica
 
-  jazz_queries:
+  jazz-queries:
     build: ./microservicios/jazz_queries
     env_file:
       - microservicios/jazz_queries/ms.env
