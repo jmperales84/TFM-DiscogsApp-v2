@@ -1,0 +1,75 @@
+{
+    "paths": {
+        "gold": "/app/datalake/gold"
+    },
+    "delta_entities_relations": {
+        "albums": [
+            {
+                "name": "Album",
+                "type": "Entity",
+                "relevant_cols": ["album_id", "ensemble","title", "year", "label", "styles", "cover_url"],
+                "cypher_file": "./queries/album_entity.cypher"
+            }
+        ],
+        "artists": [
+            {
+                "name": "Artist",
+                "type": "Entity",
+                "relevant_cols": ["artist_id", "name"],
+                "cypher_file": "./queries/artist_entity.cypher"
+            }
+        ],
+        "works": [
+            {
+                "name": "Work",
+                "type": "Entity",
+                "relevant_cols": ["work_id", "work_title"],
+                "cypher_file": "./queries/work_entity.cypher"
+            }
+        ],
+        "labels": [
+            {
+                "name": "Label",
+                "type": "Entity",
+                "relevant_cols": ["label_id", "name"],
+                "cypher_file": "./queries/label_entity.cypher"
+            }
+        ],
+        "album_artist": [
+            {
+                "name": "LEADS",
+                "type": "Relation",
+                "relevant_cols": ["album_id", "artist_id", "role"],
+                "cypher_file": "./queries/leads_relation.cypher"
+            },
+            {
+                "name": "PLAYS_IN",
+                "type": "Relation",
+                "relevant_cols": ["album_id", "artist_id", "role"],
+                "cypher_file": "./queries/plays_in_relation.cypher"
+            }
+        ],
+        "album_work": [
+            {
+                "name": "CONTAINS",
+                "type": "Relation",
+                "relevant_cols": ["album_id", "work_id"],
+                "cypher_file": "./queries/contains_relation.cypher"
+            }
+        ],
+
+        "album_label": [
+            {
+                "name": "RELEASED_BY",
+                "type": "Relation",
+                "relevant_cols": ["album_id", "label_id"],
+                "cypher_file": "./queries/released_by_relation.cypher"
+            }
+        ]
+    },
+    "spark_conf": {
+        "spark.jars": "/opt/spark/jars/delta-spark_2.12-3.2.0.jar,/opt/spark/jars/delta-storage-3.2.0.jar",
+        "spark.sql.extensions": "io.delta.sql.DeltaSparkSessionExtension",
+        "spark.sql.catalog.spark_catalog": "org.apache.spark.sql.delta.catalog.DeltaCatalog"
+    }
+}

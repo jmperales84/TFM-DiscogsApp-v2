@@ -1,0 +1,24 @@
+# Virtual environmnet (local)
+.venv/
+env/
+venv/
+
+# Python caches
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# IDE configurations
+.idea/
+.vscode/
+
+# Git
+.git/
+.gitignore
+
+# Volumes
+datalake/
+
+# Others
+*.log

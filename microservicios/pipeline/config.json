@@ -1,0 +1,36 @@
+{
+    "paths": {
+        "landing": "/app/datalake/landing",
+        "raw": "/app/datalake/raw",
+        "bronze": "/app/datalake/bronze",
+        "gold": "/app/datalake/gold"
+    },
+    "datasets": {
+        "albums": {
+            "type": "json",
+            "subdir": "albums",
+            "schema": "artists STRING, title STRING, id LONG, year STRING, label STRING, tracklist ARRAY<STRING>, musicians ARRAY<STRING>, leaders ARRAY<STRING>, style ARRAY<STRING>, cover_url STRING",
+            "reader_options": {
+                "multiLine": "true",
+                "mode": "PERMISSIVE",
+                "columnNameOfCorruptRecord": "_corrupt",
+                "maxFilesPerTrigger": "100"
+            }
+        }
+    },
+    "bronze_options": {
+        "format":  "delta",
+        "mode": "append",
+        "mergeSchema": "true"
+    },
+    "gold_options": {
+        "format":  "delta",
+        "mode": "overwrite",
+        "mergeSchema": "true"
+    },
+    "spark_conf": {
+        "spark.sql.extensions": "io.delta.sql.DeltaSparkSessionExtension",
+        "spark.sql.catalog.spark_catalog": "org.apache.spark.sql.delta.catalog.DeltaCatalog",
+        "spark.sql.shuffle.partitions": "8"
+  }
+}

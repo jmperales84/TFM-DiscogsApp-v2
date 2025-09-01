@@ -1,0 +1,100 @@
+services:
+
+  discogs-downloader:
+    build:
+      context: ./microservicios/discogs_downloader
+      dockerfile: Dockerfile
+    env_file:
+      - microservicios/discogs_downloader/ms.env
+    volumes:
+      - ./datalake:/app/datalake
+
+  pipeline:
+    build:
+      context: ./microservicios/pipeline
+      dockerfile: Dockerfile
+    depends_on:
+      discogs-downloader:
+        condition: service_completed_successfully
+    volumes:
+      - ./datalake:/app/datalake
+
+  neo4j-loader:
+    build:
+      context: ./microservicios/neo4j_loader
+      dockerfile: Dockerfile
+    depends_on:
+      pipeline:
+        condition: service_completed_successfully
+      neo4j:
+        condition: service_healthy
+    env_file:
+      - microservicios/neo4j_loader/ms.env
+    volumes:
+      - ./datalake:/app/datalake
+    networks:
+      - mi_red_privada
+
+  neo4j:
+    image: neo4j:5.23
+    env_file:
+      - microservicios/neo4j/ms.env
+    ports:
+      - "7687:7687"
+    healthcheck:
+      test: [ "CMD-SHELL", "u=$$(echo $$NEO4J_AUTH | cut -d/ -f1); p=$$(echo $$NEO4J_AUTH | cut -d/ -f2); cypher-shell -a bolt://neo4j:7687 -u $$u -p $$p 'RETURN 1' || exit 1" ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 90s
+    volumes:
+      - ./microservicios/neo4j/data:/data
+      - ./microservicios/neo4j/logs:/logs
+      - ./microservicios/neo4j/import:/import
+      - ./microservicios/neo4j/plugins:/plugins
+
+    networks:
+      - mi_red_privada
+      - mi_red_publica
+
+  neodash:
+    image: neo4jlabs/neodash:latest
+    ports:
+      - "5005:5005"             # UI de NeoDash
+    depends_on:
+      neo4j:
+        condition: service_started
+    networks:
+      - mi_red_privada          # para resolver "neo4j" por nombre (si hiciera falta)
+      - mi_red_publica          # para exponer 5005 al host
+
+  gateway:
+    image: nginx:latest
+    ports:
+      - 80:80
+    volumes:
+      - ./microservicios/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - jazz_queries
+    networks:
+      - mi_red_privada
+      - mi_red_publica
+
+  jazz_queries:
+    build: ./microservicios/jazz_queries
+    env_file:
+      - microservicios/jazz_queries/ms.env
+    expose:
+      - "8080"
+    depends_on:
+      neo4j:
+        condition: service_healthy
+    networks:
+      - mi_red_privada
+
+
+networks:
+  mi_red_privada:
+    internal: true
+  mi_red_publica:
+    driver: bridge

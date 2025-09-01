@@ -1,0 +1,78 @@
+{
+  "years" : {
+              "first": 1953,
+              "last": 1955
+  },
+  "headers": { "User-Agent": "TFMDiscogsApp/1.0" },
+  "max_results": 100,
+  "subgenres_download": {
+        "hard bop": true,
+        "bop": true,
+        "modal": true,
+        "post bop": true,
+        "cool jazz": true,
+        "swing": false,
+        "big band": false,
+        "contemporary jazz": false,
+        "vocal": false,
+        "fusion": false,
+        "jazz-funk": false,
+        "soul-jazz": false,
+        "latin jazz": false,
+        "free improvisation": false,
+        "free jazz": false,
+        "smooth jazz": false,
+        "bossa nova": false,
+        "ballad": false,
+        "avant-garde jazz": false
+  },
+  "allowed_labels": {
+        "verve": {"name": "Verve", "download": true},
+        "blue note": {"name": "Blue Note", "download": true},
+        "riverside": {"name": "Riverside", "download": true},
+        "columbia": {"name": "Columbia", "download": true},
+        "prestige" : {"name": "Prestige", "download": true},
+        "atlantic": {"name": "Atlantic", "download": true},
+        "impulse" : {"name": "Impulse!", "download": true},
+        "pacific": {"name": "Pacific", "download": true},
+        "jazzland": {"name": "Jazzland", "download": true},
+        "emarcy": {"name": "EmArcy", "download": true}
+},
+  "performing_roles": [
+        "saxophone", "alto saxophone", "tenor saxophone", "baritone saxophone",
+        "soprano saxophone", "trumpet", "trombone", "flugelhorn", "cornet",
+        "guitar", "piano", "bass", "double bass", "contrabass",
+        "drums", "percussion", "vibraphone", "marimba", "xylophone",
+        "cello", "violin", "viola", "flute", "clarinet", "oboe", "bassoon",
+        "harmonica", "organ", "harp", "accordion",
+        "vocals", "voice", "singer"
+  ],
+  "excluded_instruments": [
+      "recorded by", "recording engineer", "engineer", "assistant engineer",
+      "mixed by", "mix engineer", "remix", "mastered by", "remaster", "remastered by",
+      "edited by", "digital edit", "transfer", "audio restoration", "restoration",
+      "lacquer cut by", "cut by", "producer", "executive producer", "compilation producer",
+      "reissue producer", "production coordinator", "production manager", "coordinator",
+      "a&r", "management", "booking", "legal", "public relations", "promotion",
+      "supervised by", "supervision",
+      "artwork", "art direction", "design", "graphic", "layout",
+      "cover", "sleeve", "booklet", "insert", "typography", "calligraphy",
+      "photography", "photo", "illustration", "printed by", "lithography",
+      "liner notes", "notes", "essay by", "text by",
+      "composed by", "written-by", "lyrics by", "lyricist", "words by",
+      "music by", "score by", "theme by", "adapted by",
+      "arranged by", "orchestrated by", "orchestration", "copyist",
+      "music preparation", "transcribed by", "transcription",
+      "reissue", "research", "archiv", "curation",
+      "technician", "piano technician", "drum technician", "guitar technician",
+      "instrument technician", "backline", "stage manager", "roadie",
+      "pressed by", "manufactured by", "made by", "duplicated by", "distributed by",
+      "orchestra", "ensemble", "band", "choir", "group", "a&r", "art direction",
+      "coordination", "legacy", "reissue producer"
+],
+  "sleep_between_requests": 3,
+  "paths": {
+    "landing": "/app/datalake/landing",
+    "raw": "/app/datalake/raw"
+  }
+}
