@@ -60,13 +60,13 @@ services:
   neodash:
     image: neo4jlabs/neodash:latest
     ports:
-      - "5005:5005"             # UI de NeoDash
+      - "5005:5005"             # Neodash UI
     depends_on:
       neo4j:
         condition: service_started
     networks:
-      - mi_red_privada          # para resolver "neo4j" por nombre (si hiciera falta)
-      - mi_red_publica          # para exponer 5005 al host
+      - mi_red_privada
+      - mi_red_publica
 
   gateway:
     image: nginx:latest

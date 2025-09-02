@@ -2,7 +2,6 @@ from fastapi import FastAPI, HTTPException, Query
 from fastapi.responses import HTMLResponse
 from fastapi.middleware.cors import CORSMiddleware
 from neo4j import GraphDatabase
-import os
 from typing import List, Optional, Union
 import logging
 from neo4j import Driver  # driver type
@@ -16,7 +15,7 @@ logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s %(levelname)s [%(name)s] %(message)s"
 )
-logger = logging.getLogger("jazz_queries")
+logger = logging.getLogger("jazz-queries")
 
 
 # --- Environment variables  ---
@@ -265,33 +264,9 @@ def suggest_works(
 
 
 # --- 4) Album suggestions (autocomplete, case-insensitive) ---
-@app.get("/suggest/albums", response_model=List[SuggestItem])
-def suggest_albums(
-    q: str = Query("", description="Record title (case-insensitive)")
-):
-    """
-    Return a list of album suggestions for autocomplete.
-    """
-
-    cy = """
-    WITH toLower($q) AS q
-    MATCH (a:Album)
-    WHERE q = '' OR toLower(a.title) CONTAINS q
-    RETURN a.album_id AS id, a.title AS name
-    ORDER BY
-      CASE WHEN q <> '' AND toLower(a.title) STARTS WITH q THEN 0 ELSE 1 END,
-      coalesce(a.year, 9999),
-      toLower(a.title)
-    """
-
-    with get_driver().session() as s:
-        return s.run(cy, q=q).data()
-
-
-# 5) ---------- Minimal UI ----------
 @app.get("/ui", response_class=HTMLResponse)
 def ui():
-    """Serve a very small HTML UI to test the endpoints from a browser."""
+    """Serve a small HTML UI with optional year filters (year_min / year_max)."""
     html = """
     <!doctype html>
     <html>
@@ -305,17 +280,12 @@ def ui():
         #results { white-space: pre-wrap; background:#f7f7f7; padding:12px; border-radius:8px; min-height: 160px; }
         small.hint { color:#666; margin-left: 8px; }
         label { min-width: 90px; }
-        /* selected chips */
         #selectedList { display:flex; gap:8px; flex-wrap: wrap; }
-        .chip {
-          display:inline-flex; align-items:center; gap:6px;
-          padding:4px 8px; border-radius:16px; background:#e9eef7; border:1px solid #c9d6ee;
-        }
-        .chip button {
-          border:none; background:transparent; cursor:pointer; font-weight:bold;
-        }
+        .chip { display:inline-flex; align-items:center; gap:6px; padding:4px 8px; border-radius:16px; background:#e9eef7; border:1px solid #c9d6ee; }
+        .chip button { border:none; background:transparent; cursor:pointer; font-weight:bold; }
         .f1 { flex:1 }
         .hidden { display:none }
+        .num { width: 110px; }
       </style>
     </head>
     <body>
@@ -336,6 +306,14 @@ def ui():
       <div class="row">
         <label>Find:</label>
         <input id="query" placeholder="Type a name/title..." class="f1"/>
+      </div>
+
+      <!-- NEW: optional year filters -->
+      <div class="row">
+        <label>Years:</label>
+        <input id="ymin" class="num" type="number" placeholder="min (e.g. 1958)" min="1900" max="2100"/>
+        <input id="ymax" class="num" type="number" placeholder="max (e.g. 1965)" min="1900" max="2100"/>
+        <small class="hint">Optional filters for sessions and collaborations</small>
       </div>
 
       <div class="row">
@@ -362,6 +340,8 @@ def ui():
     <script>
     const tipoEl = document.getElementById('tipo');
     const qEl = document.getElementById('query');
+    const yminEl = document.getElementById('ymin');   // NEW
+    const ymaxEl = document.getElementById('ymax');   // NEW
     const sugEl = document.getElementById('suggestions');
     const outEl = document.getElementById('results');
     const hintEl = document.getElementById('hint');
@@ -385,10 +365,9 @@ def ui():
 
     function setHintAndVisibility() {
       const isCollab = (tipoEl.value === 'collab');
-      hintEl.textContent = isCollab ? 'Tip: find several artists and click “Run”.' : '';
+      hintEl.textContent = isCollab ? 'Tip: pick several artists, optionally set years, then “Run”.' : 'You can set years for sessions too.';
       selectedWrap.classList.toggle('hidden', !isCollab);
       collabButtons.classList.toggle('hidden', !isCollab);
-      // for collabs we keep select simple and hit Add
       sugEl.multiple = false;
       sugEl.size = isCollab ? 8 : 6;
       if (!isCollab) chosenCollab = [];
@@ -414,7 +393,6 @@ def ui():
         chip.innerHTML = `<span>${p.name}</span><button title="Remove" data-id="${p.id}">×</button>`;
         selectedListEl.appendChild(chip);
       });
-      // delegate remove
       selectedListEl.querySelectorAll('button[data-id]').forEach(btn => {
         btn.addEventListener('click', () => {
           const id = btn.getAttribute('data-id');
@@ -429,6 +407,17 @@ def ui():
       const text = await res.text();
       if (!res.ok) throw new Error(`HTTP ${res.status} – ${text}`);
       try { return JSON.parse(text); } catch { return text; }
+    }
+
+    // append year filters if valid
+    function withYears(url) {
+      const ymin = yminEl.value.trim();
+      const ymax = ymaxEl.value.trim();
+      const params = [];
+      if (ymin) params.push(`year_min=${encodeURIComponent(ymin)}`);
+      if (ymax) params.push(`year_max=${encodeURIComponent(ymax)}`);
+      if (params.length === 0) return url;
+      return url + (url.includes('?') ? '&' : '?') + params.join('&');
     }
 
     tipoEl.addEventListener('change', () => {
@@ -457,14 +446,12 @@ def ui():
       }, 250);
     });
 
-    // simple selection when no collab
     sugEl.addEventListener('change', () => {
       if (tipoEl.value === 'collab') return;
       const opt = sugEl.options[sugEl.selectedIndex];
       selectedSingle = opt ? JSON.parse(opt.dataset.payload) : null;
     });
 
-    // double click on suggestion -> add to collab
     sugEl.addEventListener('dblclick', () => {
       if (tipoEl.value !== 'collab') return;
       const opt = sugEl.options[sugEl.selectedIndex];
@@ -476,7 +463,6 @@ def ui():
       }
     });
 
-    // collab buttons
     addBtn.addEventListener('click', () => {
       if (tipoEl.value !== 'collab') return;
       const opt = sugEl.options[sugEl.selectedIndex];
@@ -501,10 +487,10 @@ def ui():
         let url;
         if (t === 'artist') {
           if (!selectedSingle?.id) throw new Error('Select an artist.');
-          url = `./artists/${encodeURIComponent(selectedSingle.id)}/sessions?limit=50`;
+          url = withYears(`./artists/${encodeURIComponent(selectedSingle.id)}/sessions?limit=50`);
         } else if (t === 'leader') {
           if (!selectedSingle?.id) throw new Error('Select a leader.');
-          url = `./leaders/${encodeURIComponent(selectedSingle.id)}/sessions?limit=50`;
+          url = withYears(`./leaders/${encodeURIComponent(selectedSingle.id)}/sessions?limit=50`);
         } else if (t === 'album') {
           if (!selectedSingle?.id) throw new Error('Select an album.');
           url = `./albums/${encodeURIComponent(selectedSingle.id)}`;
@@ -515,7 +501,7 @@ def ui():
           const ids = chosenCollab.map(x => x.id);
           if (ids.length < 2) throw new Error('Pick at least 2 artists (double-click or “Add →”).');
           const params = ids.map(id => `artists=${encodeURIComponent(id)}`).join('&');
-          url = `./collabs/albums?${params}&limit=50`;
+          url = withYears(`./collabs/albums?${params}&limit=50`);
         } else {
           throw new Error('Unsupported type.');
         }
@@ -527,14 +513,12 @@ def ui():
       }
     });
 
-    // initial state
     setHintAndVisibility();
     </script>
     </body>
     </html>
     """
     return HTMLResponse(html)
-
 
 # --- 6) Artist sessions (albums where they play + leaders) ---
 @app.get("/artists/{artist_id}/sessions",
