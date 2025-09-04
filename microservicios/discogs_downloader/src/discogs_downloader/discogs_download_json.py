@@ -254,7 +254,7 @@ class DiscogsDownloader:
             return tracklist, musicians_raw, release_data
 
         tracklist: List[str] = [t.get("title") for t in release_data.get("tracklist", []) if t.get("title")]
-        extraartists: List[str] = release_data.get("extraartists", [])
+        extraartists: List[dict] = release_data.get("extraartists", [])
 
         # First, we try to obtain the artist list from filed extraartist from main release
         collect_musicians(extraartists, musicians_raw)
@@ -267,7 +267,7 @@ class DiscogsDownloader:
             if mrr_url and mrr_url != main_release_url:
 
                 mrr_data: Dict[str, Any] = self._safe_request(mrr_url) or {}
-                extraartists: List[str] = mrr_data.get("extraartists", [])
+                extraartists: List[dict] = mrr_data.get("extraartists", [])
                 collect_musicians(extraartists, musicians_raw)
 
         return tracklist, musicians_raw, release_data

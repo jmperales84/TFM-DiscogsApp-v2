@@ -9,11 +9,19 @@ WORKDIR /app
 # Copy only requirements.txt first to take advantage of build cache
 COPY requirements.txt .
 
+# Copy source files and look for modules on /app/src
+COPY src/ ./src/
+ENV PYTHONPATH=/app/src
+
 # Install dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy the rest of the project (except files ignored in .dockerignore)
-COPY . .
+# Copy json files
+COPY config.json .
 
 # Default command to run the application
-CMD ["python", "-u", "main.py"]
+CMD ["python", "-u", "-m", "discogs_downloader.main"]
+
+
+
+

@@ -1,5 +1,5 @@
 import json
-from discogs_download_json import DiscogsDownloader
+from .discogs_download_json import DiscogsDownloader
 import os
 from pathlib import Path
 import sys
@@ -43,3 +43,4 @@ if __name__ == "__main__":
         sys.exit(1)
 
     main(config)
+

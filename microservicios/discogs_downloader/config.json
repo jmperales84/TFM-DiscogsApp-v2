@@ -27,16 +27,19 @@
         "avant-garde jazz": false
   },
   "allowed_labels": {
-        "verve": {"name": "Verve", "download": true},
-        "blue note": {"name": "Blue Note", "download": true},
-        "riverside": {"name": "Riverside", "download": true},
-        "columbia": {"name": "Columbia", "download": true},
-        "prestige" : {"name": "Prestige", "download": true},
-        "atlantic": {"name": "Atlantic", "download": true},
-        "impulse" : {"name": "Impulse!", "download": true},
-        "pacific": {"name": "Pacific", "download": true},
-        "jazzland": {"name": "Jazzland", "download": true},
-        "emarcy": {"name": "EmArcy", "download": true}
+        "verve": {"name": "Verve", "download": false},
+        "blue note": {"name": "Blue Note", "download": false},
+        "riverside": {"name": "Riverside", "download": false},
+        "columbia": {"name": "Columbia", "download": false},
+        "prestige" : {"name": "Prestige", "download": false},
+        "atlantic": {"name": "Atlantic", "download": false},
+        "impulse" : {"name": "Impulse!", "download": false},
+        "pacific": {"name": "Pacific", "download": false},
+        "jazzland": {"name": "Jazzland", "download": false},
+        "emarcy": {"name": "EmArcy", "download": false},
+        "savoy": {"name": "Savoy", "download": true},
+        "capitol": {"name": "Capitol", "download": false},
+        "argo": {"name": "Argo", "download": true}
 },
   "performing_roles": [
         "saxophone", "alto saxophone", "tenor saxophone", "baritone saxophone",
