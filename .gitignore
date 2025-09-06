@@ -21,6 +21,11 @@ build/
 venv/
 .env
 
+# Spark / PyCharm temps
+artifacts/
+.pytest_cache/
+**/spark-*/
+
 # PyCharm
 .idea/
 

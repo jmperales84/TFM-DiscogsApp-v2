@@ -142,7 +142,7 @@ class DiscogsDownloader:
 
     def _filter_label(self, result: Dict[str, Any]) -> Optional[str]:
         """
-            Check if the album label is in the allowed list.
+            Check if the album label is in the allowed list. Use it as a first filter
 
             Args:
                 result: one search result from the Discogs API.
@@ -161,7 +161,28 @@ class DiscogsDownloader:
                     return canonical
         return None
 
-    def _is_valid_format(self, result: Dict[str, Any]) -> bool:
+    def _label_from_release(self, release_data: dict) -> Optional[str]:
+        """
+        Get the label from main release.
+        - If name is stored in config, it returns the canonical name.
+        - Return first name from the release otherway.
+        """
+        labs = release_data.get("labels") or []
+        if not labs:
+            return None
+
+        # 1) check if label name is stored in config
+        for lab in labs:
+            name_lc = (lab.get("name") or "").lower()
+            for key, canonical in self.__allowed_labels.items():
+                if key in name_lc:
+                    return canonical
+
+        # 2) return the first name
+        return labs[0].get("name")
+
+    @staticmethod
+    def _is_valid_format(result: Dict[str, Any]) -> bool:
         """
             Check if the album format is valid.
 
@@ -182,6 +203,66 @@ class DiscogsDownloader:
             return False
 
         return True
+
+    @staticmethod
+    def _clean_track(title: Optional[str]) -> Optional[str]:
+        """
+           Return a clean, canonical track title.
+
+           This removes common editorial noise found in Discogs reissues:
+             - Leading "Band #N" prefixes at the start.
+             - Matrix codes at the end (e.g., " D831-1", "(S5710-1)") and anything after them.
+             - Trailing " - N" take enumerations (e.g., " - 3").
+             - Final parentheses that contain the word "take" (e.g., "(alt. take)", "(take #2)").
+             - Trailing descriptors like " - Orig./Original/New/Short/Only Take #N".
+             - Wrapping quotes around the whole title.
+             - Extra spaces.
+
+           Args:
+               title: Raw track title as scraped from Discogs.
+
+           Returns:
+               The cleaned track title as a string, or None if the input is empty or just "-".
+        """
+
+        if not title or title == "-":
+            return None
+
+        # 0) Initial compilation prefix
+        # e.g. :  'Band #10 ' / 'Band#10:' ...
+        title = re.sub(r'^\s*Band\s*#\d+\s*[:\-]?\s*', '', title, flags=re.IGNORECASE)
+
+        # 1) Remove matrix suffixes like D831-1: e.g. "Blue Bird D831-1" -> "Blue Bird",
+        # "Blue Bird (D831-1)" -> "Blue Bird" (found in Parker's records)
+        title = re.sub(r"\s+\(?[A-Z]{1,3}\d{3,5}.*$", "", title)
+
+        # 2) Remove alternate takes suffixes: "Home Cooking - 1" -> "Home Cooking" (found in Parker's records)
+        title = re.sub(r"\s*-\s*\d{1,2}\s*$", "", title)
+
+        # 3) Remove parenthesis in alternate takes: e.g. "But Not For Me (alt. take)" -> "But Not For Me"
+        m = re.match(r"^(?P<title>.*?)\s*(?P<paren>\([^)]*\btake\b[^)]*\))\s*$",
+                     title,
+                     flags=re.IGNORECASE)
+        if m:
+            title = m.group("title")
+
+        # 4) Others take suffixes: ' - Orig. Take #4', 'New Take #1', 'Only Take'…
+        title = re.sub(
+            r'\s*(?:-|—)?\s*(?:New|Short|Orig(?:inal)?\.?|Only)\s+Take(?:\s*#?\s*\d+)?\s*$',
+            '',
+            title,
+            flags=re.IGNORECASE,
+        )
+
+        # 5) Remove quotes round title:  "Billie's Bounce"
+        m = re.match(r'^\s*(["“”\'])(?P<core>.+)\1\s*$', title)
+        if m:
+            title = m.group('core').strip()
+
+        # 6) Substitute double spaces
+        title = re.sub(r'\s{2,}', ' ', title).strip()
+
+        return title
 
     def _get_tracklist_and_musicians(self, result: Dict[str, Any]) -> Tuple[List[str], List[str], Dict[str, Any]]:
         """
@@ -225,6 +306,7 @@ class DiscogsDownloader:
 
                     musicians_raw.append(name)
 
+
         tracklist: List[str] = []
         musicians_raw: List[str] = []
         release_data: Dict[str, Any] = {}
@@ -253,10 +335,20 @@ class DiscogsDownloader:
 
             return tracklist, musicians_raw, release_data
 
-        tracklist: List[str] = [t.get("title") for t in release_data.get("tracklist", []) if t.get("title")]
+        # Get the tracklist
+        for t in release_data.get("tracklist", []):
+
+            title = t.get("title")
+            title = self._clean_track(title)
+
+            if title:
+
+                tracklist.append(title.strip())
+
+        # Get the musicians from the album
         extraartists: List[dict] = release_data.get("extraartists", [])
 
-        # First, we try to obtain the artist list from filed extraartist from main release
+        # First, try to obtain the artist list from filed extraartist from main release
         collect_musicians(extraartists, musicians_raw)
 
         # If not possible, we try to get the artist list from most_recent_release
@@ -272,7 +364,8 @@ class DiscogsDownloader:
 
         return tracklist, musicians_raw, release_data
 
-    def _clean_musicians(self, musicians_raw: List[str]) -> List[str]:
+    @staticmethod
+    def _clean_musicians(musicians_raw: List[str]) -> List[str]:
         """
             Clean the raw list of musician names.
 
@@ -291,7 +384,8 @@ class DiscogsDownloader:
         # Remove parenthesis with numbers used by Discogs for artist disambiguation
         return [re.sub(r"\s*\(\d+\)$", "", name) for name in musicians]
 
-    def _identify_leaders(self, artists: str, musicians: List[str]) -> List[str]:
+    @staticmethod
+    def _identify_leaders(artists: str, musicians: List[str]) -> List[str]:
         """
             First method to identify session leaders.
 
@@ -450,7 +544,7 @@ class DiscogsDownloader:
               - It prints progress (style/year/page) and a running count of stored albums.
         """
 
-        def download_from_master(result: dict, label: str, landing_path_json: str) -> None:
+        def download_from_master(result: dict, label_hint: str, landing_path_json: str) -> None:
             """
                 Process a 'master-like' result and persist its album data.
             """
@@ -478,18 +572,21 @@ class DiscogsDownloader:
             leaders: List[str] = self._identify_leaders(artists, musicians)
 
             if not leaders and release_data:
-
                 leaders = self._identify_leaders_from_members(release_data)
+
             # If both methods failed, assign the artist/band name to leaders
             if not leaders and artists:
                 leaders = [artists]
+
+            # Get definitive label from main_release
+            label_final: str = self._label_from_release(release_data) or label_hint
 
             album_data = {
                 "artists": artists,
                 "title": title,
                 "id": mid,
                 "year": year,
-                "label": label,
+                "label": label_final,
                 "tracklist": tracklist,
                 "musicians": musicians,
                 "leaders": leaders,

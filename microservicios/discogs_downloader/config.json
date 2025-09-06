@@ -1,13 +1,13 @@
 {
   "years" : {
               "first": 1953,
-              "last": 1955
+              "last": 1959
   },
   "headers": { "User-Agent": "TFMDiscogsApp/1.0" },
   "max_results": 100,
   "subgenres_download": {
+        "bop": false,
         "hard bop": true,
-        "bop": true,
         "modal": true,
         "post bop": true,
         "cool jazz": true,
@@ -37,10 +37,15 @@
         "pacific": {"name": "Pacific", "download": false},
         "jazzland": {"name": "Jazzland", "download": false},
         "emarcy": {"name": "EmArcy", "download": false},
-        "savoy": {"name": "Savoy", "download": true},
-        "capitol": {"name": "Capitol", "download": false},
-        "argo": {"name": "Argo", "download": true}
-},
+        "savoy": {"name": "Savoy", "download": false},
+        "vee jay": {"name": "Vee Jay", "download": false},
+        "capitol": {"name": "Capitol", "download": true},
+        "roost": {"name": "Roost", "download": true},
+        "norgran": {"name": "Norgran", "download": true},
+        "argo": {"name": "Argo", "download": false},
+        "clef": {"name": "Clef", "download": false},
+        "mercury": {"name": "Mercury", "download": false}
+  },
   "performing_roles": [
         "saxophone", "alto saxophone", "tenor saxophone", "baritone saxophone",
         "soprano saxophone", "trumpet", "trombone", "flugelhorn", "cornet",
