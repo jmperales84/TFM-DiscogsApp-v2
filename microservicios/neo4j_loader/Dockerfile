@@ -13,7 +13,6 @@ WORKDIR /app
 
 COPY requirements.txt .
 
-
 RUN pip install --no-cache-dir -r requirements.txt
 
 # We take the Delta Lake JARs into the image so Spark does NOT try to download them at runtime.
@@ -25,7 +24,12 @@ RUN mkdir -p /opt/spark/jars && \
       -o /opt/spark/jars/delta-storage-3.2.0.jar
 
 
-COPY . .
+# Copy source files and look for modules on /app/src
+COPY src/ ./src/
+ENV PYTHONPATH=/app/src
+
+# Copy json files
+COPY config.json .
 
 
-CMD ["python", "main.py"]
+CMD ["python", "-u", "-m", "neo4j_loader.main"]

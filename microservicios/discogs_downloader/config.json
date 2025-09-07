@@ -1,12 +1,12 @@
 {
   "years" : {
-              "first": 1953,
-              "last": 1959
+              "first": 1960,
+              "last": 1967
   },
   "headers": { "User-Agent": "TFMDiscogsApp/1.0" },
   "max_results": 100,
   "subgenres_download": {
-        "bop": false,
+        "bop": true,
         "hard bop": true,
         "modal": true,
         "post bop": true,
@@ -39,10 +39,10 @@
         "emarcy": {"name": "EmArcy", "download": false},
         "savoy": {"name": "Savoy", "download": false},
         "vee jay": {"name": "Vee Jay", "download": false},
-        "capitol": {"name": "Capitol", "download": true},
-        "roost": {"name": "Roost", "download": true},
-        "norgran": {"name": "Norgran", "download": true},
-        "argo": {"name": "Argo", "download": false},
+        "capitol": {"name": "Capitol", "download": false},
+        "roost": {"name": "Roost", "download": false},
+        "norgran": {"name": "Norgran", "download": false},
+        "argo": {"name": "Argo", "download": true},
         "clef": {"name": "Clef", "download": false},
         "mercury": {"name": "Mercury", "download": false}
   },

@@ -580,6 +580,10 @@ class DiscogsDownloader:
 
             # Get definitive label from main_release
             label_final: str = self._label_from_release(release_data) or label_hint
+            # Quitamos posibles paréntesis de desambiguación "Argo (6)" -> "Argo"
+            m = re.match(r"(.*)(\s+\(\d+\))$", label_final)
+            if m:
+                label_final = m.group(1)
 
             album_data = {
                 "artists": artists,
