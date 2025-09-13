@@ -228,25 +228,41 @@ class DiscogsDownloader:
         if not title or title == "-":
             return None
 
-        # 0) Initial compilation prefix
+        # 0) Remove suffixes like " - New short take 2": e.g. "Another Hair Do - Short-Take 1" -> "Another Hair Do"
+        m = re.match(r"^(.*)(\s+-.*take.*)$", title, flags=re.IGNORECASE)
+        if m:
+            title = m.group(1)
+
+        # 1) Remove suffixes like " - (Original Master)"
+        m = re.match(r"^(.*)\s+-.*(\([^)]*orig[^)]*\))\s*$", title, flags=re.IGNORECASE)
+        if m:
+            title = m.group(1)
+
+        # 2) Remove suffixes like " (Original)": e.g. "Billie's Bounce (Original)" -> "Billie's Bounce"
+        m = re.match(r"^(.*)\s+(\([^)]*orig[^)]*\))\s*$", title, flags=re.IGNORECASE)
+        if m:
+            title = m.group(1)
+
+
+        # 3) Initial compilation prefix
         # e.g. :  'Band #10 ' / 'Band#10:' ...
         title = re.sub(r'^\s*Band\s*#\d+\s*[:\-]?\s*', '', title, flags=re.IGNORECASE)
 
-        # 1) Remove matrix suffixes like D831-1: e.g. "Blue Bird D831-1" -> "Blue Bird",
+        # 4) Remove matrix suffixes like D831-1: e.g. "Blue Bird D831-1" -> "Blue Bird",
         # "Blue Bird (D831-1)" -> "Blue Bird" (found in Parker's records)
         title = re.sub(r"\s+\(?[A-Z]{1,3}\d{3,5}.*$", "", title)
 
-        # 2) Remove alternate takes suffixes: "Home Cooking - 1" -> "Home Cooking" (found in Parker's records)
+        # 5) Remove alternate takes suffixes: "Home Cooking - 1" -> "Home Cooking" (found in Parker's records)
         title = re.sub(r"\s*-\s*\d{1,2}\s*$", "", title)
 
-        # 3) Remove parenthesis in alternate takes: e.g. "But Not For Me (alt. take)" -> "But Not For Me"
+        # 6) Remove parenthesis in alternate takes: e.g. "But Not For Me (alt. take)" -> "But Not For Me"
         m = re.match(r"^(?P<title>.*?)\s*(?P<paren>\([^)]*\btake\b[^)]*\))\s*$",
                      title,
                      flags=re.IGNORECASE)
         if m:
             title = m.group("title")
 
-        # 4) Others take suffixes: ' - Orig. Take #4', 'New Take #1', 'Only Take'…
+        # 7) Others take suffixes: ' - Orig. Take #4', 'New Take #1', 'Only Take'…
         title = re.sub(
             r'\s*(?:-|—)?\s*(?:New|Short|Orig(?:inal)?\.?|Only)\s+Take(?:\s*#?\s*\d+)?\s*$',
             '',
@@ -254,12 +270,12 @@ class DiscogsDownloader:
             flags=re.IGNORECASE,
         )
 
-        # 5) Remove quotes round title:  "Billie's Bounce"
+        # 8) Remove quotes round title:  "Billie's Bounce"
         m = re.match(r'^\s*(["“”\'])(?P<core>.+)\1\s*$', title)
         if m:
             title = m.group('core').strip()
 
-        # 6) Substitute double spaces
+        # 9) Substitute double spaces
         title = re.sub(r'\s{2,}', ' ', title).strip()
 
         return title

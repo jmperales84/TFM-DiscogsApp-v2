@@ -1,6 +1,6 @@
 {
   "years" : {
-              "first": 1960,
+              "first": 1953,
               "last": 1967
   },
   "headers": { "User-Agent": "TFMDiscogsApp/1.0" },
@@ -38,11 +38,12 @@
         "jazzland": {"name": "Jazzland", "download": false},
         "emarcy": {"name": "EmArcy", "download": false},
         "savoy": {"name": "Savoy", "download": false},
+        "dial": {"name": "Dial", "download": true},
         "vee jay": {"name": "Vee Jay", "download": false},
         "capitol": {"name": "Capitol", "download": false},
         "roost": {"name": "Roost", "download": false},
         "norgran": {"name": "Norgran", "download": false},
-        "argo": {"name": "Argo", "download": true},
+        "argo": {"name": "Argo", "download": false},
         "clef": {"name": "Clef", "download": false},
         "mercury": {"name": "Mercury", "download": false}
   },

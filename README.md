@@ -574,14 +574,19 @@ Some limitations are known:
   Albums not labeled with any jazz subgenre (e.g., hard bop, post bop, modal…) are **skipped** during download.  
   As a result, some relevant jazz albums may not appear in the dataset.
 
+- **Albums recorded during the study period but released years later**
+  It is very common for some albums to be recorded during the 50s or 60s but they were released many years later.
+  The capture logic only considers release years, so those albums won't be stored. One of my favorite
+  albums that were skipped is *Minor Move* by **Tina Brooks** (https://en.wikipedia.org/wiki/Minor_Move).
+
 - **Leader extraction logic**  
   The current logic infers the leader by checking if a musician’s name in personnel list is a **substring** of 
   the `artist` field.  
   - Works well when `artist` is a single musician (e.g., *John Coltrane*).  
-  - Works in groups where the leader’s name is explicit (*The Miles Davis Quintet* -> **Miles Davis**).  
+  - Works in groups where the leader’s name is explicit (*The Miles Davis Quintet* -> [**Miles Davis**]).  
   - Works well in string with several names (*Stan Getz & Gerry Mulligan* -> [**Stan Getz**, **Gerry Mulligan**])
   - **Fails** for ensembles where no leader name is in the string (*The Modern Jazz Quartet* -> 
-    not linked to **Milt Jackson**).  
+    not linked to **Milt Jackson**, and we get [**The Modern Jazz Quartet**]).  
   - In such cases, the leader is set equal to the `artist` string.
 
 - **Missing personnel**  

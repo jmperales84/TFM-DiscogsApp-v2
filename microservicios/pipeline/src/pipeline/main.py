@@ -196,7 +196,6 @@ def run_gold(spark: SparkSession, config: dict) -> None:
 
     wr.write_df(spark, GoldTransformer.albums(bronze_df), "albums")
     wr.write_df(spark, GoldTransformer.artists(bronze_df), "artists")
-    wr.write_df(spark, GoldTransformer.tracks(bronze_df), "tracks")
     wr.write_df(spark, GoldTransformer.album_artist(bronze_df), "album_artist")
     wr.write_df(spark, GoldTransformer.labels(bronze_df), "labels")
     wr.write_df(spark, GoldTransformer.works(bronze_df), "works")
@@ -267,10 +266,6 @@ def main():
     print("\n=== gold.artists ===")
     spark.sql("SELECT * FROM gold.artists LIMIT 10").show(truncate=False)
     print("Number of rows in gold.artists:", spark.sql("SELECT COUNT(*) AS cnt FROM gold.artists").collect()[0]["cnt"])
-
-    print("\n=== gold.tracks ===")
-    spark.sql("SELECT * FROM gold.tracks LIMIT 10").show(truncate=False)
-    print("Number of rows in gold.tracks:", spark.sql("SELECT COUNT(*) AS cnt FROM gold.tracks").collect()[0]["cnt"])
 
     print("\n=== gold.album_artist ===")
     spark.sql("SELECT * FROM gold.album_artist LIMIT 10").show(truncate=False)

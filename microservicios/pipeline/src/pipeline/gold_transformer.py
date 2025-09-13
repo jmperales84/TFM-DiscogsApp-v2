@@ -316,48 +316,6 @@ class GoldTransformer:
     # Facts / link tables
     # --------------------------------------------
 
-    @staticmethod
-    def tracks(bronze_df: DataFrame) -> DataFrame:
-        """
-            Build the Tracks fact table (one row per distinct track per album).
-
-            Steps:
-                - Explode `tracklist` and keep the album id.
-                - Clean the track name: remove "(... take ...)" notes, trim, normalize.
-                - Deduplicate by (album_id, norm_name) to collapse alternate takes.
-                - Create `track_id` as SHA-256 of "album_id::norm_name".
-                - Return a readable `name` (cleaned) instead of the fully normalized one.
-
-            Args:
-                bronze_df: input DataFrame with columns `id` and `tracklist`.
-
-            Returns:
-                A DataFrame with:
-                    - track_id  : SHA-256 hash of album_id and normalized title.
-                    - album_id  : album identifier.
-                    - name      : cleaned, human-friendly track name.
-        """
-
-        from pyspark.sql.functions import sha2
-
-        tracks: DataFrame = (bronze_df
-                  .select(col("id").alias("album_id"),
-                          explode_outer("tracklist").alias("raw_name")))
-
-        clean: DataFrame = (tracks
-                 .withColumn("name", _strip_take_parens(trim(col("raw_name"))))
-                 .withColumn("norm_name", _norm_title(col("name")))
-                 .where(length(col("norm_name")) > 0)
-                 .dropDuplicates(["album_id", "norm_name"])
-                 )
-
-        return clean.select(
-            sha2(concat_ws("::",
-                           col("album_id").cast("string"),
-                           col("norm_name")), 256).alias("track_id"),
-            col("album_id"),
-            col("name")
-        )
 
     @staticmethod
     def album_artist(bronze_df: DataFrame) -> DataFrame:

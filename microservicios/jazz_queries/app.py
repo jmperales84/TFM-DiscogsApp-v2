@@ -308,7 +308,7 @@ def ui():
         <input id="query" placeholder="Type a name/title..." class="f1"/>
       </div>
 
-      <!-- NEW: optional year filters -->
+      <!-- Optional year filters -->
       <div class="row">
         <label>Years:</label>
         <input id="ymin" class="num" type="number" placeholder="min (e.g. 1958)" min="1900" max="2100"/>
