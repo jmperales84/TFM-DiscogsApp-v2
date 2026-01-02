@@ -1,12 +1,16 @@
-# Jazz Explorer Discogs App
+# TheJazzGraph
 
 *(Repository: `TFM-DiscogsApp-v2` – Final Master's Project)*
 
-A data engineering project based on microservices that extracts jazz album metadata from the Discogs API, processes it with Spark & Delta Lake, 
+**TheJazzGraph** is a data engineering project based on microservices that extracts jazz album metadata from the Discogs API, processes it with Spark & Delta Lake, 
 and builds a graph database in Neo4j for exploration and visualization.
 
 The goal is to provide an open dataset of jazz albums, musicians, songs, and labels for a time period defined by the user, 
-with tools to query and visualize musical connections. The results in this document are based on the 1953–1967 period.
+with tools to query and visualize musical connections. The results in this document are based on the 1953–1967 period. 
+
+At its current stage, the project runs locally and exposes a REST API designed to query and analyze relationships between artists, albums, labels, works and sessions.
+
+A web application is currently under development to bring this graph exploration experience to a user-facing interface.
 
 ## 1. Architecture and Microservices
 
