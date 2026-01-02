@@ -263,7 +263,7 @@ def suggest_works(
         return s.run(cy, q=q).data()
 
 
-# --- 4) Album suggestions (autocomplete, case-insensitive) ---
+# --- 4) Simple HTML UI for searching entities by name (autocomplete, case-insensitive) ---
 @app.get("/ui", response_class=HTMLResponse)
 def ui():
     """Serve a small HTML UI with optional year filters (year_min / year_max)."""
@@ -520,7 +520,7 @@ def ui():
     """
     return HTMLResponse(html)
 
-# --- 6) Artist sessions (albums where they play + leaders) ---
+# --- 5) Artist sessions (albums where they play + leaders) ---
 @app.get("/artists/{artist_id}/sessions",
     response_model=List[ArtistSession],
     response_model_exclude_none=True
@@ -578,7 +578,7 @@ def artist_sessions(
 
     return rows
 
-# 7) --- Albums where a selected set of artists all play together ---
+# 6) --- Albums where a selected set of artists all play together ---
 @app.get("/collabs/albums",
          response_model=List[CollabAlbum],
          response_model_exclude_none=True
@@ -647,7 +647,7 @@ def collabs_albums(
 
     return rows
 
-# 8) --- Album details by id ---
+# 7) --- Album details by id ---
 @app.get("/albums/{album_id}",
          response_model=AlbumDetail,
          response_model_exclude_none=True
@@ -699,7 +699,7 @@ def get_album(album_id: int):
     return rec["album"]
 
 
-# 9) --- Sessions led by a given artist ---
+# 8) --- Sessions led by a given artist ---
 @app.get("/leaders/{artist_id}/sessions",
          response_model=List[LeaderSession],
          response_model_exclude_none=True
@@ -765,7 +765,7 @@ def leader_sessions(
     return rows
 
 
-# 10) --- Appearances of a given work (standard) ---
+# 9) --- Appearances of a given work (standard) ---
 @app.get("/works/{work_id}",
          response_model=List[WorkAppearance],
          response_model_exclude_none=True

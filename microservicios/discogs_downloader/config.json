@@ -38,14 +38,17 @@
         "jazzland": {"name": "Jazzland", "download": false},
         "emarcy": {"name": "EmArcy", "download": false},
         "savoy": {"name": "Savoy", "download": false},
-        "dial": {"name": "Dial", "download": true},
+        "dial": {"name": "Dial", "download": false},
         "vee jay": {"name": "Vee Jay", "download": false},
         "capitol": {"name": "Capitol", "download": false},
         "roost": {"name": "Roost", "download": false},
         "norgran": {"name": "Norgran", "download": false},
         "argo": {"name": "Argo", "download": false},
+        "moodsville": {"name": "Moodsville", "download": false},
         "clef": {"name": "Clef", "download": false},
-        "mercury": {"name": "Mercury", "download": false}
+        "mercury": {"name": "Mercury", "download": false},
+        "new jazz": {"name": "New Jazz", "download": true},
+        "fantasy": {"name": "Fantasy", "download": true}
   },
   "performing_roles": [
         "saxophone", "alto saxophone", "tenor saxophone", "baritone saxophone",
